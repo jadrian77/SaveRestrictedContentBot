@@ -9,6 +9,7 @@ from main.plugins.helpers import screenshot
 from pyrogram import Client, filters
 from pyrogram.errors import ChannelBanned, ChannelInvalid, ChannelPrivate, ChatIdInvalid, ChatInvalid, PeerIdInvalid
 from pyrogram.enums import MessageMediaType
+from pyrogram.types import InputMediaPhoto, InputMediaVideo
 from ethon.pyfunc import video_metadata
 from ethon.telefunc import fast_upload
 from telethon.tl.types import DocumentAttributeVideo
@@ -20,6 +21,15 @@ def thumbnail(sender):
     else:
          return None
       
+def remove_file(file_paths):
+    for file_name in file_paths :
+        try:
+            os.remove(file_name)
+            if os.path.isfile(file_name) == True:
+                os.remove(file_name)
+        except Exception:
+            pass
+
 async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
     
     """ userbot: PyrogramUserBot
@@ -47,32 +57,54 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
             chat = int('-100' + str(msg_link.split("/")[-2]))
         file = ""
         try:
-            msg = await userbot.get_messages(chat, msg_id)
-            if msg.media:
-                if msg.media==MessageMediaType.WEB_PAGE:
-                    edit = await client.edit_message_text(sender, edit_id, "Cloning.")
-                    await client.send_message(sender, msg.text.markdown)
-                    await edit.delete()
-                    return
-            if not msg.media:
-                if msg.text:
-                    edit = await client.edit_message_text(sender, edit_id, "Cloning.")
-                    await client.send_message(sender, msg.text.markdown)
-                    await edit.delete()
-                    return
+            # single or group
+            single_msg = await userbot.get_messages(chat, msg_id)
+            msg_group = [single_msg]
+            if single_msg.media_group_id :
+                msg_group = await userbot.get_media_group(chat, msg_id)
+            
+            # download all
+            file_names = []
+            input_file = []
             edit = await client.edit_message_text(sender, edit_id, "Trying to Download.")
-            file = await userbot.download_media(
-                msg,
-                progress=progress_for_pyrogram,
-                progress_args=(
-                    client,
-                    "**DOWNLOADING:**\n",
-                    edit,
-                    time.time()
+            for msg in msg_group:
+                if msg.media:
+                    if msg.media==MessageMediaType.WEB_PAGE:
+                        edit = await client.edit_message_text(sender, edit_id, "Cloning.")
+                        await client.send_message(sender, msg.text.markdown)
+                        await edit.delete()
+                        return
+                if not msg.media:
+                    if msg.text:
+                        edit = await client.edit_message_text(sender, edit_id, "Cloning.")
+                        await client.send_message(sender, msg.text.markdown)
+                        await edit.delete()
+                        return
+                file = await userbot.download_media(
+                    msg,
+                    progress=progress_for_pyrogram,
+                    progress_args=(
+                        client,
+                        "**DOWNLOADING:**\n",
+                        edit,
+                        time.time()
+                    )
                 )
-            )
-            print(file)
+                print(file)
+                file_names.append(file)
+                if msg.media==MessageMediaType.VIDEO :
+                    input_file.append(InputMediaVideo(file))
+                elif msg.media==MessageMediaType.PHOTO :
+                    input_file.append(InputMediaPhoto(file))
+
             await edit.edit('Preparing to Upload!')
+            if len(file_names) >= 2 and len(input_file) >= 2 :
+                await client.send_media_group(sender, input_file)
+                remove_file(file_names)
+                return await edit.delete()
+            
+            file = file_names[0]
+            msg = msg_group[0]
             caption = None
             if msg.caption is not None:
                 caption = msg.caption
@@ -142,12 +174,7 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
                         time.time()
                     )
                 )
-            try:
-                os.remove(file)
-                if os.path.isfile(file) == True:
-                    os.remove(file)
-            except Exception:
-                pass
+            remove_file(file_names)
             await edit.delete()
         except (ChannelBanned, ChannelInvalid, ChannelPrivate, ChatIdInvalid, ChatInvalid):
             await client.edit_message_text(sender, edit_id, "Have you joined the channel?")
