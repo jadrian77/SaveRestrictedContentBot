@@ -206,6 +206,9 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
                 new_link = f't.me/b/{chat}/{int(msg_id)}'
                 #recurrsion 
                 return await get_msg(userbot, client, bot, sender, edit_id, new_link, i)
+            if msg.media_group_id :
+                await edit.delete()
+                return await client.copy_media_group(sender, chat, msg_id)
             await client.copy_message(sender, chat, msg_id)
         except Exception as e:
             print(e)
