@@ -29,8 +29,15 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
     edit = ""
     chat = ""
     round_message = False
-    if "?single" in msg_link:
-        msg_link = msg_link.split("?single")[0]
+    params = {}
+    if "?" in msg_link:
+        msg_link_split = msg_link.split("?")
+        msg_link = msg_link_split[0]
+        params_split = msg_link_split[1].split("&")
+        for params_str in params_split:
+            if "=" in params_str:
+                params_key_value = params_str.split("=")
+                params[params_key_value[0]] = params_key_value[1]
     msg_id = int(msg_link.split("/")[-1]) + int(i)
     height, width, duration, thumb_path = 90, 90, 0, None
     if 't.me/c/' in msg_link or 't.me/b/' in msg_link:
