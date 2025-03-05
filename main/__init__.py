@@ -22,10 +22,10 @@ AUTH = config("AUTH", default=None, cast=int)
 #proxy
 PROXY_TYPE = config("PROXY_TYPE", default=None)
 PROXY_HOST = config("PROXY_HOST", default=None)
-PROXY_PORT = config("PROXY_PORT", default=None, cast=int)
+PROXY_PORT = config("PROXY_PORT", default=0, cast=int)
 client_proxy = None
 TelegramClient_proxy = None
-if PROXY_TYPE and PROXY_HOST and PROXY_PORT:
+if PROXY_TYPE and PROXY_HOST and PROXY_PORT != 0:
     client_proxy = {
         "scheme": PROXY_TYPE,  
         "hostname": PROXY_HOST,
