@@ -19,9 +19,23 @@ SESSION = config("SESSION", default=None)
 FORCESUB = config("FORCESUB", default=None)
 AUTH = config("AUTH", default=None, cast=int)
 
-bot = TelegramClient('bot', API_ID, API_HASH).start(bot_token=BOT_TOKEN) 
+#proxy
+PROXY_TYPE = config("PROXY_TYPE", default=None)
+PROXY_HOST = config("PROXY_HOST", default=None)
+PROXY_PORT = config("PROXY_PORT", default=None, cast=int)
+client_proxy = None
+TelegramClient_proxy = None
+if PROXY_TYPE and PROXY_HOST and PROXY_PORT:
+    client_proxy = {
+        "scheme": PROXY_TYPE,  
+        "hostname": PROXY_HOST,
+        "port": PROXY_PORT,
+    }
+    TelegramClient_proxy = (PROXY_TYPE, PROXY_HOST, PROXY_PORT)
 
-userbot = Client("saverestricted", session_string=SESSION, api_hash=API_HASH, api_id=API_ID) 
+bot = TelegramClient('bot', API_ID, API_HASH, proxy=TelegramClient_proxy).start(bot_token=BOT_TOKEN)
+
+userbot = Client("saverestricted", session_string=SESSION, api_hash=API_HASH, api_id=API_ID, proxy=client_proxy)
 
 try:
     userbot.start()
@@ -33,7 +47,8 @@ Bot = Client(
     "SaveRestricted",
     bot_token=BOT_TOKEN,
     api_id=int(API_ID),
-    api_hash=API_HASH
+    api_hash=API_HASH,
+    proxy=client_proxy
 )    
 
 try:
