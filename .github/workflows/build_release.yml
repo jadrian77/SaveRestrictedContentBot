@@ -29,12 +29,7 @@ jobs:
 
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller --onefile --name=forward_bot \
-                      --hidden-import=ethon.pyfunc \
-                      --hidden-import=ethon.telefunc \
-                      --hidden-import=ethon.mystarts \
-                      --add-data "main/plugins:main/plugins" \
-                      main/__main__.py
+          pyinstaller --onefile --name=forward_bot main/__main__.py
 
       - name: Create tar.gz package
         run: |

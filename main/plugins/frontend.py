@@ -47,3 +47,5 @@ async def clone(event):
         print(e)
         await Drone.send_message(event.sender_id, f"An error occurred during cloning of `{link}`\n\n**Error:** {str(e)}")
     
+
+print(f"main has Imported  {os.path.basename(__file__)}")

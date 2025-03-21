@@ -252,3 +252,5 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
 async def get_bulk_msg(userbot, client, sender, msg_link, i):
     x = await client.send_message(sender, "Processing!")
     await get_msg(userbot, client, Drone, sender, x.id, msg_link, i)
+
+print(f"main has Imported  {os.path.basename(__file__)}")

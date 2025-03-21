@@ -86,3 +86,5 @@ def TimeFormatter(milliseconds: int) -> str:
         ((str(minutes) + "m, ") if minutes else "") + \
         ((str(seconds) + "s, ") if seconds else "")
     return tmp[:-2]
+
+print(f"main has Imported  {os.path.basename(__file__)}")

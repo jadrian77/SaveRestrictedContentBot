@@ -47,3 +47,5 @@ async def start(event):
     text = "Send me Link of any message to clone it here, For private channel message, send invite link first.\n\n**SUPPORT:** @TeamDrone"
     await start_srb(event, text)
     
+
+print(f"main has Imported  {os.path.basename(__file__)}")

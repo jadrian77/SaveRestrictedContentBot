@@ -111,3 +111,5 @@ async def run_batch(userbot, client, sender, link, _range):
         await asyncio.sleep(timer)
         await protection.delete()
             
+
+print(f"main has Imported  {os.path.basename(__file__)}")

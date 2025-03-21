@@ -7,13 +7,7 @@ from main import bot
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
                     level=logging.WARNING)
 
-path = "main/plugins/*.py"
-files = glob.glob(path)
-for name in files:
-    with open(name) as a:
-        patt = Path(a.name)
-        plugin_name = patt.stem
-        load_plugins(plugin_name.replace(".py", ""))
+from main.plugins import batch, frontend, helpers, progress, pyroplug, start
 
 #Don't be a thief 
 print("Successfully deployed!")

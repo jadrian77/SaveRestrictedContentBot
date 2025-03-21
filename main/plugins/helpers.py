@@ -71,3 +71,5 @@ async def screenshot(video, duration, sender):
         return out
     else:
         None       
+
+print(f"main has Imported  {os.path.basename(__file__)}")
