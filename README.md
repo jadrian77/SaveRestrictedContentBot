@@ -97,3 +97,22 @@ Deploy your bot on `Okteto` [Useless]
 Tutorial for okteto - [click here](https://telegra.ph/Okteto-Deploy-04-01)
 
 [![Develop on Okteto](https://okteto.com/develop-okteto.svg)](https://cloud.okteto.com)
+
+
+# Release User Manual
+
+- step 1 download and decompression：
+
+```
+wget $(curl -s https://api.github.com/repos/LiangJiQi/SaveRestrictedContentBot/releases/latest | grep "browser_download_url" | cut -d '"' -f 4)
+tar -xf forward_bot.tar.gz
+```
+
+- step 2 Set environment variables：
+  `copy the keys of Variables into .env file`
+  
+
+- step 3 run the bot:
+```
+nohup ./forward_bot > bot.log 2>&1 &
+```
