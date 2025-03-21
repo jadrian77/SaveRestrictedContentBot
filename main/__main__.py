@@ -2,7 +2,7 @@ import glob
 from pathlib import Path
 from main.utils import load_plugins
 import logging
-from . import bot
+from main import bot
 
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
                     level=logging.WARNING)
