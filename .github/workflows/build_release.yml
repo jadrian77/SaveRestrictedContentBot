@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04 # compatibility issues may occur in the last version, use old version maybe fix.
     
     steps:
       - name: Checkout code
@@ -38,7 +38,7 @@ jobs:
 
       - name: Create tar.gz package
         run: |
-          tar -czvf forward_bot.tar.gz dist/forward_bot .env
+          tar -czvf forward_bot.tar.gz -C dist forward_bot -C .. .env
 
       - name: Create GitHub Release
         id: create_release
