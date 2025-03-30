@@ -9,7 +9,7 @@ from main.plugins.helpers import screenshot
 from pyrogram import Client, filters
 from pyrogram.errors import ChannelBanned, ChannelInvalid, ChannelPrivate, ChatIdInvalid, ChatInvalid, PeerIdInvalid
 from pyrogram.enums import MessageMediaType
-from pyrogram.types import InputMediaPhoto, InputMediaVideo
+from pyrogram.types import InputMediaPhoto, InputMediaVideo, InputMediaDocument, InputMediaAudio, InputMediaAnimation, InputMessageContent
 from ethon.pyfunc import video_metadata
 from ethon.telefunc import fast_upload
 from telethon.tl.types import DocumentAttributeVideo
@@ -96,6 +96,15 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
                     input_file.append(InputMediaVideo(file))
                 elif msg.media==MessageMediaType.PHOTO :
                     input_file.append(InputMediaPhoto(file))
+                elif msg.media==MessageMediaType.DOCUMENT :
+                    input_file.append(InputMediaDocument(file))
+                elif msg.media==MessageMediaType.AUDIO :
+                    input_file.append(InputMediaAudio(file))
+                elif msg.media==MessageMediaType.ANIMATION :
+                    input_file.append(InputMediaAnimation(file))
+                elif msg.media==MessageMediaType.CONTACT :
+                    input_file.append(InputMessageContent(file))
+                
 
             await edit.edit('Preparing to Upload!')
             if len(file_names) >= 2 and len(input_file) >= 2 :
