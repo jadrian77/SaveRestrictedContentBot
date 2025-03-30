@@ -240,6 +240,12 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
         except Exception:
             pass
         await edit.delete()
+    elif 'comment' in params :
+        chat =  msg_link.split("t.me")[1].split("/")[1]
+        discussion_chat = await userbot.get_discussion_message(chat, msg_id)
+        comment = await userbot.get_messages(discussion_chat.chat.id, int(params['comment']))
+        if comment.link :
+            return await get_msg(userbot, client, bot, sender, edit_id, comment.link, i)
     else:
         edit = await client.edit_message_text(sender, edit_id, "Cloning.")
         chat =  msg_link.split("t.me")[1].split("/")[1]
