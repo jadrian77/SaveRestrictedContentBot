@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04 # compatibility issues may occur in the last version, use old version maybe fix.
+    runs-on: ubuntu-22.04 # compatibility issues may occur in the last version, use old version maybe fix.
     
     steps:
       - name: Checkout code
