@@ -3,6 +3,8 @@
 import asyncio, time, os
 
 from .. import bot as Drone
+from .. import config as config
+from .. import FORCESUB
 from main.plugins.progress import progress_for_pyrogram
 from main.plugins.helpers import screenshot
 
@@ -22,6 +24,9 @@ def thumbnail(sender):
          return None
       
 def remove_file(file_paths):
+    SAVE_FILE = config.get('BASE', 'SAVE_FILE', fallback=None)
+    if SAVE_FILE and SAVE_FILE.lower() != "false" :
+        return 
     for file_name in file_paths :
         try:
             os.remove(file_name)
@@ -35,6 +40,7 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
     """ userbot: PyrogramUserBot
     client: PyrogramBotClient
     bot: TelethonBotClient """
+    COPY_TO_CHANNEL = config.get('ADVANCED', 'COPY_TO_CHANNEL', fallback=None)
     
     edit = ""
     chat = ""
@@ -109,6 +115,8 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
             await edit.edit('Preparing to Upload!')
             if len(file_names) >= 2 and len(input_file) >= 2 :
                 await client.send_media_group(sender, input_file)
+                if COPY_TO_CHANNEL and COPY_TO_CHANNEL.lower() != "false" :
+                    await client.send_media_group(FORCESUB, input_file)
                 remove_file(file_names)
                 return await edit.delete()
             
@@ -127,19 +135,11 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
                     thumb_path = await screenshot(file, duration, sender)
                 except Exception:
                     thumb_path = None
-                await client.send_video_note(
-                    chat_id=sender,
-                    video_note=file,
-                    length=height, duration=duration, 
-                    thumb=thumb_path,
-                    progress=progress_for_pyrogram,
-                    progress_args=(
-                        client,
-                        '**UPLOADING:**\n',
-                        edit,
-                        time.time()
-                    )
-                )
+                await client.send_video_note(chat_id=sender, video_note=file, length=height, duration=duration,  thumb=thumb_path, progress=progress_for_pyrogram
+                                             , progress_args=(client, '**UPLOADING:**\n', edit, time.time()))
+                if COPY_TO_CHANNEL and COPY_TO_CHANNEL.lower() != "false" :
+                    await client.send_video_note(chat_id=FORCESUB, video_note=file, length=height, duration=duration,  thumb=thumb_path, progress=progress_for_pyrogram
+                                             , progress_args=(client, '**UPLOADING:**\n', edit, time.time()))
             elif msg.media==MessageMediaType.VIDEO and msg.video.mime_type in ["video/mp4", "video/x-matroska"]:
                 print("Trying to get metadata")
                 data = video_metadata(file)
@@ -149,40 +149,23 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
                     thumb_path = await screenshot(file, duration, sender)
                 except Exception:
                     thumb_path = None
-                await client.send_video(
-                    chat_id=sender,
-                    video=file,
-                    caption=caption,
-                    supports_streaming=True,
-                    height=height, width=width, duration=duration, 
-                    thumb=thumb_path,
-                    progress=progress_for_pyrogram,
-                    progress_args=(
-                        client,
-                        '**UPLOADING:**\n',
-                        edit,
-                        time.time()
-                    )
-                )
-            
+                await client.send_video(chat_id=sender, video=file, caption=caption, supports_streaming=True, height=height, width=width, duration=duration
+                                        , thumb=thumb_path, progress=progress_for_pyrogram, progress_args=(client, '**UPLOADING:**\n', edit, time.time()))
+                if COPY_TO_CHANNEL and COPY_TO_CHANNEL.lower() != "false" :
+                    await client.send_video(chat_id=FORCESUB, video=file, caption=caption, supports_streaming=True, height=height, width=width, duration=duration
+                                        , thumb=thumb_path, progress=progress_for_pyrogram, progress_args=(client, '**UPLOADING:**\n', edit, time.time()))
             elif msg.media==MessageMediaType.PHOTO:
                 await edit.edit("Uploading photo.")
-                await bot.send_file(sender, file, caption=caption)
+                await client.send_file(sender, file, caption=caption)
+                if COPY_TO_CHANNEL and COPY_TO_CHANNEL.lower() != "false" :
+                    await client.send_file(FORCESUB, file, caption=caption)
             else:
                 thumb_path=thumbnail(sender)
-                await client.send_document(
-                    sender,
-                    file, 
-                    caption=caption,
-                    thumb=thumb_path,
-                    progress=progress_for_pyrogram,
-                    progress_args=(
-                        client,
-                        '**UPLOADING:**\n',
-                        edit,
-                        time.time()
-                    )
-                )
+                await client.send_document(sender, file, caption=caption, thumb=thumb_path, progress=progress_for_pyrogram
+                                           , progress_args=(client, '**UPLOADING:**\n', edit, time.time()))
+                if COPY_TO_CHANNEL and COPY_TO_CHANNEL.lower() != "false" :
+                    await client.send_document(FORCESUB, file, caption=caption, thumb=thumb_path, progress=progress_for_pyrogram
+                                               , progress_args=(client, '**UPLOADING:**\n', edit, time.time()))
             remove_file(file_names)
             await edit.delete()
         except (ChannelBanned, ChannelInvalid, ChannelPrivate, ChatIdInvalid, ChatInvalid):
@@ -216,27 +199,18 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
                         UT = time.time()
                         uploader = await fast_upload(f'{file}', f'{file}', UT, bot, edit, '**UPLOADING:**')
                         await bot.send_file(sender, uploader, caption=caption, thumb=thumb_path, force_document=True)
-                    if os.path.isfile(file) == True:
-                        os.remove(file)
+                    remove_file([file])
                 except Exception as e:
                     print(e)
                     await client.edit_message_text(sender, edit_id, f'Failed to save: `{msg_link}`\n\nError: {str(e)}')
-                    try:
-                        os.remove(file)
-                    except Exception:
-                        return
+                    remove_file([file])
                     return 
             else:
                 await client.edit_message_text(sender, edit_id, f'Failed to save: `{msg_link}`\n\nError: {str(e)}')
-                try:
-                    os.remove(file)
-                except Exception:
-                    return
+                remove_file([file])
                 return
         try:
-            os.remove(file)
-            if os.path.isfile(file) == True:
-                os.remove(file)
+            remove_file([file])
         except Exception:
             pass
         await edit.delete()
@@ -257,7 +231,11 @@ async def get_msg(userbot, client, bot, sender, edit_id, msg_link, i):
                 return await get_msg(userbot, client, bot, sender, edit_id, new_link, i)
             if msg.media_group_id :
                 await edit.delete()
+                if COPY_TO_CHANNEL and COPY_TO_CHANNEL.lower() != "false" :
+                    await client.copy_media_group(FORCESUB, chat, msg_id)
                 return await client.copy_media_group(sender, chat, msg_id)
+            if COPY_TO_CHANNEL and COPY_TO_CHANNEL.lower() != "false" :
+                await client.copy_message(FORCESUB, chat, msg_id)
             await client.copy_message(sender, chat, msg_id)
         except Exception as e:
             print(e)

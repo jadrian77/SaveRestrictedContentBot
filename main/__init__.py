@@ -6,7 +6,7 @@ from telethon.sessions import StringSession
 from telethon.sync import TelegramClient
 
 from decouple import config
-import logging, time, sys
+import logging, time, sys, configparser
 
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
                     level=logging.WARNING)
@@ -36,6 +36,9 @@ if PROXY_TYPE and PROXY_HOST and PROXY_PORT != 0:
 bot = TelegramClient('bot', API_ID, API_HASH, proxy=TelegramClient_proxy).start(bot_token=BOT_TOKEN)
 
 userbot = Client("saverestricted", session_string=SESSION, api_hash=API_HASH, api_id=API_ID, proxy=client_proxy)
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 try:
     userbot.start()
